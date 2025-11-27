@@ -1,0 +1,11 @@
+data/raw/*
+!data/raw/.gitkeep
+
+data/clean/*
+!data/clean/.gitkeep
+
+data/output/*
+!data/output/.gitkeep
+
+reports/*
+!reports/.gitkeep
