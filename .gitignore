@@ -9,3 +9,7 @@ data/output/*
 
 reports/*
 !reports/.gitkeep
+
+venv/
+*.pyc
+__pycache__/
