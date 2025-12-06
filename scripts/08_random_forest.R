@@ -1,5 +1,5 @@
 # ===============================================================
-# Fase 8 — Modelos Random Forest (Proyecto Parte 2)
+# Fase 8 — Modelos Random Forest
 # ---------------------------------------------------------------
 # Este script:
 #   1. Carga el dataset de modelado preparado en la Fase 6.
