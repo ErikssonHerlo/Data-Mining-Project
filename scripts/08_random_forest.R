@@ -1,5 +1,9 @@
 # ===============================================================
+<<<<<<< HEAD
 # Fase 8 — Modelos Random Forest
+=======
+# Fase 8 — Modelos Random Forest (Proyecto Parte 2)
+>>>>>>> 75590ad (Feat: add Random Forest modeling script for multiple targets)
 # ---------------------------------------------------------------
 # Este script:
 #   1. Carga el dataset de modelado preparado en la Fase 6.
