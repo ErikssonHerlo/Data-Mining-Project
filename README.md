@@ -1,20 +1,30 @@
 # Análisis de condiciones de vivienda y migración internacional en Guatemala (Censo 2018)
-Por: Eriksson José Hernández López  
-Email: erikssonhernandez25@gmail.com
 
-Este repositorio contiene un flujo de trabajo completo en R para analizar las condiciones de vivienda, servicios básicos y migración internacional en Guatemala, utilizando los microdatos del Censo de Población y Vivienda 2018 (INE).
+Autor: **Eriksson José Hernández López**  
+Email: **erikssonhernandez25@gmail.com**
 
-El proyecto implementa:
+Este repositorio contiene un flujo de trabajo completo para analizar las condiciones de vivienda, servicios básicos y migración internacional en Guatemala utilizando los microdatos del **Censo de Población y Vivienda 2018** del **INE**.
 
-- Limpieza y unificación de bases (PERSONA, HOGAR, VIVIENDA, MIGRACION).
-- Construcción de un índice preliminar de calidad de vivienda.
-- Resumen de información de migración a nivel de hogar.
-- Minería de datos:
-  - Reglas de asociación con Apriori.
-  - Patrones frecuentes tipo FP-Growth (usando Eclat).
-  - Clustering de hogares con k-means.
+El proyecto está dividido en dos grandes partes:
 
-Todos los datos originales, así como los resultados pesados, se mantienen fuera del control de versiones por motivos de tamaño y confidencialidad.
+1. **Parte 1 – Minería de datos en R**  
+   - Limpieza y unificación de bases (PERSONA, HOGAR, VIVIENDA, MIGRACION).
+   - Construcción de un índice preliminar de calidad de vivienda.
+   - Resumen de información de migración a nivel de hogar.
+   - Minería de datos:
+     - Reglas de asociación con Apriori.
+     - Patrones frecuentes tipo FP-Growth (usando Eclat).
+     - Clustering de hogares con k-means.
+
+2. **Parte 2 – Modelos predictivos (R + Python)**  
+   - Preparación de un dataset de modelado a nivel de hogar.
+   - Árboles de decisión (4 targets distintos) en R.
+   - Random Forest (3 targets distintos) en R.
+   - Redes neuronales (3 modelos) en Python (TensorFlow/Keras).
+   - Generación de reportes y figuras para el informe final y las propuestas de intervención.
+
+Los datos originales, así como los resultados, **no se versionan en Git** por tamaño y confidencialidad.  
+Para facilitar la revisión, se incluye un archivo **`reports.zip`** con ejemplos de salidas ya generadas (gráficas y tablas clave).
 
 ---
 
@@ -22,70 +32,86 @@ Todos los datos originales, así como los resultados pesados, se mantienen fuera
 
 ### 1.1 Software
 
-- R versión 4.2 o superior (recomendado 4.3+).
-
-Opcionalmente:
-
-- RStudio como entorno de desarrollo (no es obligatorio, pero facilita la ejecución de los scripts).
+- **R** versión 4.2 o superior (recomendado 4.3+).
+- **Python** 3.10+ (recomendado).
+- Opcional: **RStudio** para trabajar con R de forma más cómoda.
+- Opcional: un editor para Python (VS Code, PyCharm, etc.).
 
 ### 1.2 Paquetes de R
 
-Instalar los siguientes paquetes antes de ejecutar los scripts:
+Instalar los siguientes paquetes en R:
 
 ```r
 install.packages(c(
-  "data.table",
-  "arules",
-  "ggplot2"   # utilizado de forma opcional para algunas visualizaciones
+  "rpart.plot",
 ))
 ````
 
-Los scripts utilizan principalmente:
+Principales usos:
 
-* `data.table` para manejo eficiente de datos.
-* `arules` para reglas de asociación (Apriori) y patrones frecuentes (Eclat).
-* `ggplot2` para visualizaciones básicas en el análisis de clusters (k-means).
+* `data.table`: manejo eficiente de datos.
+* `arules`: reglas de asociación (Apriori) y patrones frecuentes (Eclat).
+* `ggplot2`: visualizaciones (especialmente k-means).
+* `rpart` y `rpart.plot`: árboles de decisión.
+* `randomForest`: bosques aleatorios.
+* `caret`: matrices de confusión y métricas de desempeño.
 
----
+### 1.3 Paquetes de Python y entorno virtual
 
-## 2. Estructura del repositorio
+Se recomienda crear un **entorno virtual** para aislar las dependencias de Python.
 
-La estructura propuesta es la siguiente:
+#### 1.3.1 Creación de entorno virtual
 
-```text
-project/
-│
-├── data/
-│   ├── raw/            # Datos originales descargados del INE (Censo 2018)
-│   ├── clean/          # Datos limpios intermedios (generados por 01_limpieza.R)
-│   └── output/         # Bases unificadas y salidas intermedias (02_unificacion.R)
-│
-├── reports/
-│   ├── apriori/        # Resultados de reglas de asociación (03_apriori.R)
-│   ├── fpgrowth/       # Resultados de patrones frecuentes (04_fpgrowth.R)
-│   └── clustering/     # Resultados de k-means (05_clustering.R)
-│
-├── scripts/
-│   ├── 01_limpieza.R
-│   ├── 02_unificacion.R
-│   ├── 03_apriori.R
-│   ├── 04_fpgrowth.R
-│   └── 05_clustering.R
-│
-└── README.md
+En la raíz del proyecto:
+
+```bash
+python -m venv .venv
 ```
 
-Las carpetas `data/` y `reports/` están ignoradas en el control de versiones (`.gitignore`), por lo que deben crearse localmente.
+Activar el entorno:
+
+* En Linux / macOS:
+
+  ```bash
+  source .venv/bin/activate
+  ```
+
+* En Windows (PowerShell o CMD):
+
+  ```bash
+  .venv\Scripts\activate
+  ```
+
+Para salir del entorno:
+
+```bash
+deactivate
+```
+
+#### 1.3.2 Instalación de paquetes de Python
+
+Dentro del entorno virtual activado, instalar:
+
+```bash
+pip install pandas numpy scikit-learn tensorflow matplotlib
+```
+
+Principales usos:
+
+* `pandas`, `numpy`: manipulación de datos.
+* `scikit-learn`: partición train/test, normalización, codificación.
+* `tensorflow` / `keras`: construcción y entrenamiento de redes neuronales.
+* `matplotlib`: gráficas de entrenamiento/validación.
 
 ---
 
-## 3. Descarga y preparación de los datos
+## 2. Descarga y preparación de los datos
 
-### 3.1 Descarga de los microdatos
+### 2.1 Descarga de microdatos del Censo 2018
 
 1. Ingresar al sitio oficial del Censo 2018:
 
-   * [https://censo2018.ine.gob.gt/descarga](https://censo2018.ine.gob.gt/descarga)
+   [https://censo2018.ine.gob.gt/descarga](https://censo2018.ine.gob.gt/descarga)
 
 2. Descargar los microdatos correspondientes a:
 
@@ -93,42 +119,84 @@ Las carpetas `data/` y `reports/` están ignoradas en el control de versiones (`
    * Hogares (HOGAR)
    * Viviendas (VIVIENDA)
    * Migración (MIGRACION)
-   * Diccionario de datos (en PDF o Excel, según lo proporcione el INE)
+   * Diccionario de datos (en Excel o PDF)
 
-   Los nombres exactos pueden variar, pero este repositorio asume archivos del tipo:
+Los nombres exactos pueden variar, pero este repositorio asume archivos del tipo:
 
-   * `PERSONA_BDP.csv`
-   * `HOGAR_BDP.csv`
-   * `VIVIENDA_BDP.csv`
-   * `MIGRACION_BDP.csv`
-   * Diccionario de datos (por ejemplo, `Diccionario_Censo2018.*`)
+* `PERSONA_BDP.csv`
+* `HOGAR_BDP.csv`
+* `VIVIENDA_BDP.csv`
+* `MIGRACION_BDP.csv`
+* Archivos de diccionario (`Diccionario_Base_*.xlsx`)
 
-### 3.2 Organización de archivos
+### 2.2 Organización de archivos
 
-1. Crear la carpeta `data/raw/` en la raíz del proyecto (si no existe).
-2. Descomprimir los archivos descargados del INE dentro de `data/raw/`.
-3. Al finalizar, la carpeta `data/raw/` debe contener al menos:
+1. Crear la carpeta `data/raw/` en la raíz del proyecto, si no existe.
+2. Descomprimir o copiar los archivos descargados dentro de `data/raw/`.
+3. Al finalizar, la carpeta `data/raw/` debe verse similar a:
 
-   ```text
-   data/raw/
-     ├── PERSONA_BDP.csv
-     ├── HOGAR_BDP.csv
-     ├── VIVIENDA_BDP.csv
-     ├── MIGRACION_BDP.csv
-     └── Diccionario_Censo2018.*   # nombre referencial
-   ```
+```text
+data/raw/
+  ├── PERSONA_BDP.csv
+  ├── HOGAR_BDP.csv
+  ├── VIVIENDA_BDP.csv
+  ├── MIGRACION_BDP.csv
+  ├── Diccionario de datos/
+  │   ├── Diccionario_Base_EMIGRACION.xlsx
+  │   ├── Diccionario_Base_HOGAR.xlsx
+  │   ├── Diccionario_Base_PERSONA.xlsx
+  │   └── Diccionario_Base_VIVIENDA.xlsx
+  └── z_Verificacion Integridad de Bases SHA256.txt
+```
 
-Es importante que `data/raw/` contenga únicamente los archivos de datos originales y el diccionario correspondiente, sin modificaciones adicionales.
+La carpeta `data/raw/` debe contener únicamente los datos originales y el diccionario.
 
 ---
 
-## 4. Flujo de trabajo y ejecución de scripts
+## 3. Estructura del repositorio
 
-Los scripts están pensados para ejecutarse en orden, ya sea desde RStudio, desde la consola de R o usando `Rscript`. A continuación se describe el flujo de trabajo completo.
+Estructura general del proyecto:
+
+```text
+.
+├── data
+│   ├── raw/               # Datos originales (NO versionados)
+│   ├── clean/             # Datos limpios intermedios (RDS, generados)
+│   └── output/            # Bases unificadas y datasets listos para modelar
+│
+├── reports
+│   ├── apriori/           # Resultados de Apriori
+│   ├── fpgrowth/          # Resultados de FP-Growth (Eclat)
+│   ├── clustering/        # Resultados de k-means
+│   ├── arboles/           # Árboles de decisión (imágenes y métricas)
+│   ├── random_forest/     # Random Forest (curvas OOB, importancia, métricas)
+│   └── redes_neuronales/  # Resultados y figuras de redes neuronales
+│
+├── scripts
+│   ├── 01_limpieza.R
+│   ├── 02_unificacion.R
+│   ├── 03_apriori.R
+│   ├── 04_fp_growth.R
+│   ├── 05_kmeans.R
+│   ├── 06_preparacion_modelado.R
+│   ├── 07_arboles_decision.R
+│   ├── 08_random_forest.R
+│   └── 09_redes_neuronales.py
+│
+├── reports.zip            # Ejemplos de salidas ya generadas (solo referencia)
+├── .gitignore
+└── README.md
+```
+
+Las carpetas `data/` y `reports/` se excluyen del control de versiones mediante `.gitignore` porque contienen archivos muy pesados. Para facilitar la revisión, se incluye **`reports.zip`** con ejemplos de resultados.
+
+---
+
+## 4. Parte 1 – Minería de datos en R (Fases 1 a 5)
 
 ### 4.1 Fase 1 – Limpieza de datos (`01_limpieza.R`)
 
-**Objetivo:** cargar y limpiar los cuatro archivos de microdatos del INE, generando versiones estandarizadas y coherentes a nivel de tipos de datos y codificaciones.
+**Objetivo:** cargar y limpiar los microdatos originales del INE.
 
 **Entrada:**
 
@@ -137,211 +205,277 @@ Los scripts están pensados para ejecutarse en orden, ya sea desde RStudio, desd
 * `data/raw/VIVIENDA_BDP.csv`
 * `data/raw/MIGRACION_BDP.csv`
 
-**Pasos principales:**
-
-* Carga de cada archivo con `data.table::fread()`.
-* Conversión de columnas a tipos adecuados (`integer`, `numeric`, `factor`, `character`) según el diccionario.
-* Recodificación de valores especiales (por ejemplo, 9, 99, 999) a `NA` donde corresponda.
-* Homologación de nombres de columnas entre las distintas bases.
-* Mensajes informativos en consola indicando:
-
-  * número de registros y columnas,
-  * cantidad de valores faltantes,
-  * columnas corregidas.
-
-**Salida:**
-
-Se guardan versiones limpias en formato `.rds` dentro de `data/clean/`, por ejemplo:
+**Salida (ejemplo):**
 
 * `data/clean/persona_clean.rds`
 * `data/clean/hogar_clean.rds`
 * `data/clean/vivienda_clean.rds`
 * `data/clean/migracion_clean.rds`
 
+El script informa en consola el número de registros, columnas, valores faltantes y transformaciones aplicadas.
+
 ### 4.2 Fase 2 – Unificación de bases (`02_unificacion.R`)
 
-**Objetivo:** integrar la información de vivienda, hogar, personas y migración en bases unificadas que permitan análisis posteriores.
+**Objetivo:** integrar información de viviendas, hogares, personas y migración.
 
 **Entrada:**
 
-* Archivos `.rds` generados en `data/clean/` durante la Fase 1.
+* RDS limpios en `data/clean/`.
 
-**Pasos principales:**
+**Procesos clave:**
 
-* Definición de llaves de unión:
-
-  * Llave de vivienda (ejemplo):
-
-    * `DEPARTAMENTO`, `MUNICIPIO`, `COD_MUNICIPIO`, `AREA`/`ZONA`, `NUM_VIVIENDA`
-  * Llave de hogar:
-
-    * `DEPARTAMENTO`, `MUNICIPIO`, `COD_MUNICIPIO`, `AREA`/`ZONA`, `NUM_VIVIENDA`, `NUM_HOGAR`
-* Unión de HOGAR y VIVIENDA para formar `hogar_vivienda`.
-* Construcción de un índice preliminar de calidad de vivienda combinando:
-
-  * material de paredes, techo y piso,
-  * acceso a agua mejorada,
-  * saneamiento mejorado,
-  * electricidad.
-* Resumen de la información de migración a nivel de hogar:
-
-  * número total de emigrantes,
-  * número de emigrantes hombres y mujeres,
-  * edad promedio de emigrantes.
-* Unión de la información de migración con `hogar_vivienda` para producir `hogar_vivienda_migracion`.
-* Unión final de `hogar_vivienda_migracion` con PERSONA para generar `base_persona_maestra`.
-
-Durante la ejecución, el script imprime en consola:
-
-* llaves utilizadas,
-* número de registros antes y después de cada unión,
-* resumen del índice de calidad de vivienda,
-* estadísticas básicas de migración (cantidad de hogares con emigrantes, edad promedio, etc.).
+* Definición de llaves a nivel de vivienda y hogar.
+* Unión de HOGAR + VIVIENDA → `hogar_vivienda`.
+* Construcción de un **índice preliminar de calidad de vivienda** combinando materiales y acceso a servicios.
+* Resumen de migración a nivel de hogar (número de emigrantes, edad promedio).
+* Unión de migración con `hogar_vivienda` → `hogar_vivienda_migracion`.
+* Unión final con PERSONA → `base_persona_maestra`.
 
 **Salida:**
 
-En `data/output/` se generan archivos como:
-
-* `hogar_vivienda.rds`
-* `hogar_vivienda_migracion.rds`
-* `base_persona_maestra.rds`
-* y versiones en `.csv` para inspección rápida:
-
-  * `hogar_vivienda_migracion.csv`
-  * `base_persona_maestra.csv`
+* `data/output/hogar_vivienda.rds`
+* `data/output/hogar_vivienda_migracion.rds`
+* `data/output/base_persona_maestra.rds`
+* Versiones `.csv` para inspección.
 
 ### 4.3 Fase 3 – Reglas de asociación (Apriori) (`03_apriori.R`)
 
-**Objetivo:** identificar patrones de coocurrencia entre características de vivienda, servicios básicos y migración mediante el algoritmo Apriori.
+**Objetivo:** obtener reglas de asociación entre características de vivienda y migración.
 
 **Entrada:**
 
 * `data/output/hogar_vivienda_migracion.rds`
 
-**Pasos principales:**
+**Salida principal:**
 
-* Selección de variables categóricas relevantes:
+* `reports/apriori/reglas_apriori_lift_mayor_1.csv`
+* `reports/apriori/reglas_apriori_lift_mayor_1.rds`
+* Gráficas de soporte/confianza (por ejemplo, `hist_confianza_reglas.png`, `scatter_soporte_confianza_lift.png`).
 
-  * materiales de construcción (pared, techo, piso),
-  * acceso a agua, saneamiento, electricidad,
-  * índice de calidad de vivienda (categorizado),
-  * número de cuartos,
-  * área (urbana/rural),
-  * número de emigrantes (categorizado).
-* Transformación de variables numéricas en categorías (por ejemplo, calidad muy baja, baja, media, alta).
-* Conversión a objeto `transactions` del paquete `arules`.
-* Ejecución de Apriori con parámetros de soporte y confianza definidos en el script.
-* Filtrado de reglas con `lift > 1`.
-* Exportación de reglas resultantes.
+### 4.4 Fase 4 – FP-Growth / Eclat (`04_fp_growth.R`)
 
-**Salida:**
-
-En `reports/apriori/` se generan archivos como:
-
-* `reglas_apriori_lift1.csv`
-* `reglas_apriori_lift1.rds`
-
-### 4.4 Fase 4 – Patrones frecuentes FP-Growth / Eclat (`04_fpgrowth.R`)
-
-**Objetivo:** complementar el análisis con minería de patrones frecuentes utilizando el algoritmo Eclat (FP-like).
+**Objetivo:** extraer patrones frecuentes tipo FP-Growth usando Eclat.
 
 **Entrada:**
 
-* `data/output/hogar_vivienda_migracion.rds` (o la misma derivación de variables categóricas utilizada en Apriori).
+* `data/output/hogar_vivienda_migracion.rds`
 
-**Pasos principales:**
+**Salida principal:**
 
-* Selección de variables categóricas de vivienda y servicios.
-* Conversión a formato `transactions`.
-* Ejecución de Eclat con:
+* `reports/fpgrowth/itemsets_frecuentes_fp_growth.csv`
+* `reports/fpgrowth/reglas_fp_growth_lift_gt_1.csv`
+* `reports/fpgrowth/reglas_fp_growth.rds`
+* Gráficas de soporte de itemsets y soporte/confianza de reglas.
 
-  * soporte mínimo configurable,
-  * longitud máxima de los itemsets.
-* Inducción de reglas a partir de itemsets frecuentes mediante `ruleInduction`.
-* Filtrado de reglas con confianza mínima y `lift > 1`.
-* Exportación de itemsets y reglas resultantes.
+### 4.5 Fase 5 – Clustering k-means (`05_kmeans.R`)
 
-**Salida:**
-
-En `reports/fpgrowth/` se generan archivos como:
-
-* `itemsets_frecuentes_fp_growth.csv`
-* `reglas_fp_growth_lift_gt_1.csv`
-* `reglas_fp_growth.rds`
-
-### 4.5 Fase 5 – Clustering de hogares (k-means) (`05_clustering.R`)
-
-**Objetivo:** agrupar hogares en clusters relativamente homogéneos de acuerdo con su calidad de vivienda, tamaño del hogar y migración.
+**Objetivo:** identificar grupos de hogares con patrones similares.
 
 **Entrada:**
 
 * `data/output/hogar_vivienda_migracion.rds`
 * `data/output/base_persona_maestra.rds`
 
-**Pasos principales:**
+**Salida principal:**
 
-* Cálculo del número de personas por hogar a partir de `base_persona_maestra`.
-* Unión del conteo de personas con `hogar_vivienda_migracion`.
-* Selección de variables numéricas para clustering, por ejemplo:
+* `reports/clustering/resumen_clusters_k4.csv`
+* `reports/clustering/hogar_vivienda_migracion_clusters_k4.csv`
+* `reports/clustering/modelo_kmeans_k4.rds`
+* `reports/clustering/scatter_clusters_k4.png`
 
-  * índice de calidad de vivienda,
-  * número de personas,
-  * número de emigrantes,
-  * edad promedio de emigrantes (si está disponible).
-* Filtrado de hogares con datos completos en estas variables.
-* Escalamiento de las variables (media 0, varianza 1).
-* Ejecución de k-means con un número de clusters `k` definido en el script (por ejemplo `k = 4`).
-* Asignación de etiquetas de cluster a cada hogar.
-* Cálculo de un resumen descriptivo por cluster (medias de cada variable de interés).
+---
+
+## 5. Parte 2 – Modelos predictivos
+
+### 5.1 Fase 6 – Preparación del dataset de modelado (`06_preparacion_modelado.R`)
+
+**Objetivo:** construir un dataset a nivel de hogar listo para modelos supervisados (árboles, random forest, redes neuronales).
+
+**Procesos clave:**
+
+* Cálculo de `n_personas` por hogar y unión con `hogar_vivienda_migracion`.
+* Uso de variables derivadas de fases anteriores, como:
+
+  * `indice_calidad_vivienda`
+  * `n_emigrantes`
+  * `edad_promedio_emigrantes`
+  * `cluster_k4` (resultado del k-means)
+  * indicadores binarios de servicios (`agua_mejorada`, `saneamiento_mejorado`, `electricidad`).
+* Creación de variables objetivo categóricas:
+
+  * `indice_calidad_vivienda_cat`
+  * `n_emigrantes_cat`
 
 **Salida:**
 
-En `reports/clustering/` se generan archivos como:
+* `data/output/modeling_dataset.csv`
+* `data/output/modeling_dataset_sample.csv` (muestra reducida para pruebas más rápidas).
 
-* `resumen_clusters_k4.csv`
-* `hogar_vivienda_migracion_clusters_k4.csv`
-* `modelo_kmeans_k4.rds`
+### 5.2 Fase 7 – Árboles de decisión (4 targets) (`07_arboles_decision.R`)
+
+**Objetivo:** entrenar cuatro modelos de árbol de decisión para distintos objetivos:
+
+1. Target: `indice_calidad_vivienda_cat`
+   Predictoras: materiales, servicios, área, cluster k-means.
+
+2. Target: `n_emigrantes_cat`
+   Predictoras: área, índice de calidad, tamaño del hogar, clúster.
+
+3. Target: `agua_mejorada`
+   Predictoras: área, materiales, región/departamento, clúster.
+
+4. Target: `cluster_k4`
+   Predictoras: tamaño del hogar, índice de vivienda, servicios básicos.
+
+Cada modelo:
+
+* Divide datos en train/test.
+* Ajusta un árbol con `rpart`.
+* Genera:
+
+  * Gráfico del árbol (`*.png`).
+  * Matriz de confusión (`*.csv`).
+  * Métricas básicas de desempeño.
+  * Importancia de variables (`*.csv`).
+  * Predicciones por escenarios (guardadas en CSV).
+
+**Salida:**
+
+* Directorio `reports/arboles/` con:
+
+  * `modeloX_arbol.png`
+  * `modeloX_matriz_confusion.csv`
+  * `modeloX_importancia_variables.csv`
+  * `modeloX_predicciones_escenarios.csv`
+
+### 5.3 Fase 8 – Random Forest (3 targets) (`08_random_forest.R`)
+
+**Objetivo:** entrenar tres modelos de Random Forest sobre objetivos relacionados, pero con configuraciones y combinaciones de variables diferentes a los árboles.
+
+Ejemplos de modelos:
+
+1. RF 1 – Target: `cluster_k4`
+   Predictoras: materiales, servicios, tamaño del hogar, migración.
+
+2. RF 2 – Target: `indice_calidad_vivienda_cat`
+   Predictoras: servicios básicos, materiales, área, departamento.
+
+3. RF 3 – Target: `n_emigrantes_cat`
+   Predictoras: calidad de vivienda, tamaño del hogar, servicios, área.
+
+Cada modelo:
+
+* Calcula error out-of-bag (OOB) y lo grafica.
+* Exporta importancia de variables.
+* Evalúa en test con matriz de confusión.
+* Genera predicciones para escenarios específicos.
+
+**Salida:**
+
+* Directorio `reports/random_forest/` con:
+
+  * Curvas de error OOB (`*.png`).
+  * Importancia de variables (`*_importance.csv`).
+  * Matrices de confusión (`*_matriz_confusion.csv`).
+  * Predicciones por escenarios (`*_predicciones_escenarios.csv`).
+
+### 5.4 Fase 9 – Redes neuronales en Python (3 modelos) (`09_redes_neuronales.py`)
+
+**Objetivo:** construir tres redes neuronales que repliquen los targets de los árboles de decisión para comparar desempeño y capacidad de modelar relaciones complejas.
+
+Targets:
+
+1. NN1 – `indice_calidad_vivienda_cat`
+2. NN2 – `n_emigrantes_cat`
+3. NN3 – `agua_mejorada`
+
+Cada modelo realiza:
+
+* División train/test.
+* Normalización de variables numéricas.
+* One-hot encoding de variables categóricas (usando `ColumnTransformer`).
+* Definición de una arquitectura clara en Keras (capas densas, dropout).
+* Entrenamiento con validación (`validation_split`).
+* Gráficas de entrenamiento vs validación:
+
+  * Accuracy.
+  * Loss.
+* Evaluación en test (accuracy).
+* Predicciones para escenarios concretos.
+* Guardado del modelo en formato Keras (`*.keras`).
+
+**Ejecución:**
+
+Dentro del entorno virtual:
+
+```bash
+python scripts/09_redes_neuronales.py
+```
+
+**Salida:**
+
+* Directorio `reports/redes_neuronales/` con:
+
+  * `nnX_accuracy.png`, `nnX_loss.png`
+  * `nnX_predicciones_escenarios.csv`
+  * `nnX_model.keras`
+
+En el documento de resultados se compara:
+
+* Accuracy de las redes neuronales frente a sus árboles de decisión correspondientes.
+* Comportamiento de las curvas de entrenamiento/validación (posibles indicios de sobreajuste o buen ajuste).
+* Interpretación de los escenarios simulados.
 
 ---
 
-## 5. Ejecución rápida del pipeline
+## 6. Ejecución rápida del pipeline
 
-Si se desea ejecutar el pipeline completo desde la consola de R o un script de automatización, se puede seguir el siguiente orden:
+Orden recomendado:
+
+En R:
 
 ```r
+# Parte 1
 source("scripts/01_limpieza.R")
 source("scripts/02_unificacion.R")
 source("scripts/03_apriori.R")
-source("scripts/04_fpgrowth.R")
-source("scripts/05_clustering.R")
+source("scripts/04_fp_growth.R")
+source("scripts/05_kmeans.R")
+
+# Parte 2
+source("scripts/06_preparacion_modelado.R")
+source("scripts/07_arboles_decision.R")
+source("scripts/08_random_forest.R")
 ```
 
-Cada script imprime información detallada en la consola sobre:
+En Python (con entorno virtual activado):
 
-* qué archivo está cargando,
-* cuántos registros procesa,
-* qué transformaciones aplica,
-* qué salidas genera y en qué carpeta.
+```bash
+python scripts/09_redes_neuronales.py
+```
 
----
-
-## 6. Interpretación y reporte final
-
-Los resultados generados en las carpetas `reports/apriori/`, `reports/fpgrowth/` y `reports/clustering/` sirven como insumo para elaborar un reporte final en PDF, que puede incluir:
-
-* descripción del dataset y del proceso de limpieza/unificación,
-* análisis de las reglas de asociación más relevantes (al menos cuatro patrones interesantes),
-* descripción de los patrones frecuentes obtenidos con Eclat,
-* análisis de los clusters de hogares encontrados con k-means,
-* propuestas de intervención basadas en evidencia para mejorar las condiciones de vivienda y servicios en Guatemala.
-
-Este README se concentra en la estructura técnica y la reproducibilidad del repositorio. La interpretación sustantiva y las propuestas de política pública deben desarrollarse en un documento aparte (artículo, informe técnico o tesis) utilizando como base los resultados generados por los scripts.
+El orden garantiza que cada fase encuentre los archivos generados en la fase anterior.
 
 ---
 
-## 7. Créditos y uso de datos
+## 7. Sobre la carpeta `reports/` y el archivo `reports.zip`
 
-* Los datos utilizados en este proyecto provienen del **Instituto Nacional de Estadística (INE) de Guatemala**, específicamente de los microdatos del **Censo de Población y Vivienda 2018**.
-* El uso de la información debe respetar los términos, condiciones y licencias definidos por el INE y la normativa nacional sobre protección de datos.
-* Este repositorio se limita a proveer código para el procesamiento y análisis de los datos; no distribuye los microdatos ni reproduce información sensible.
-* Cualquier duda o consulta sobre el código puede dirigirse al autor del repositorio.
+* La carpeta `reports/` se **excluye del control de versiones** en `.gitignore` debido al tamaño y a la naturaleza derivada de los archivos (gráficas, CSV masivos, modelos entrenados).
+* Para facilitar la visualización de resultados sin necesidad de ejecutar todos los scripts, se incluye en el repositorio un archivo **`reports.zip`** que contiene una versión de referencia de los reportes generados.
+* Si se desea inspeccionar rápidamente los resultados:
+
+  1. Descomprimir `reports.zip` en la raíz del proyecto.
+  2. Navegar por `reports/` y revisar las figuras y tablas.
+* Si se desea regenerar todos los resultados desde cero, se recomienda:
+
+  * Vaciar o eliminar `reports/`.
+  * Ejecutar nuevamente los scripts en el orden indicado.
+
+---
+
+## 8. Créditos y uso de datos
+
+* Los datos utilizados provienen del **Instituto Nacional de Estadística (INE) de Guatemala**, específicamente de los microdatos del **Censo de Población y Vivienda 2018**.
+* El uso de la información debe respetar los términos, condiciones y licencias definidas por el INE y la normativa nacional sobre protección de datos.
+* Este repositorio únicamente proporciona código para el procesamiento y análisis de los datos; **no** distribuye microdatos ni información sensible.
+* Para consultas sobre el código o la estructura del proyecto, se puede contactar al autor en **[erikssonhernandez25@gmail.com](mailto:erikssonhernandez25@gmail.com)**.
